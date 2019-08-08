@@ -1,11 +1,6 @@
 <template>
 <q-layout-footer class="status-footer">
-    <div class="status-line row items-center">
-        <div class="status row items-center">
-            <span>{{ $t("footer.status") }}:</span>
-            <span class="status-text" :class="[status]">{{ $t(`footer.${status}`) }}</span>
-        </div>
-        <div class="row">
+    <div class="status-line">
             <template v-if="config_daemon.type !== 'remote'">
                 <div>Daemon: {{ daemon.info.height_without_bootstrap }} / {{ target_height }} ({{ daemon_local_pct }}%)</div>
             </template>
@@ -14,11 +9,12 @@
                 <div>{{ $t("footer.remote") }}: {{ daemon.info.height }}</div>
             </template>
 
-            <div>{{ $t("footer.wallet") }}: {{ wallet.info.height }} / {{ target_height }} ({{ wallet_pct }}%)</div>
-        </div>
+            <div>Wallet: {{ wallet.info.height }} / {{ target_height }} ({{ wallet_pct }}%)</div>
+            
+            <div>{{ status }}</div>
 
     </div>
-    <div class="status-bars" :class="[status]">
+    <div class="status-bars">
         <div v-bind:style="{ width: daemon_pct+'%' }"></div>
         <div v-bind:style="{ width: wallet_pct+'%' }"></div>
     </div>
