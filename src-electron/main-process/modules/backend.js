@@ -315,6 +315,15 @@ export class Backend {
                 ...this.config_data,
                 ...validated
             }
+            
+            // Filter out http:// from remote_host (remote daemon address)
+            if(this.config_data.daemon.remote_host.indexOf("//") !== -1) {
+              let remote_host = this.config_data.daemon.remote_host
+              remote_host = this.config_data.daemon.remote_host.split("//")
+              remote_host.shift()
+              remote_host = remote_host.join("//")
+              this.config_data.daemon.remote_host = remote_host
+            }
 
             // save config file back to file, so updated options are stored on disk
             fs.writeFile(this.config_file, JSON.stringify(this.config_data, null, 4), "utf8", () => {})
