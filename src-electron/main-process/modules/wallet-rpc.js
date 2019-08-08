@@ -636,7 +636,6 @@ export class WalletRPC {
 
     heartbeatAction (extended = false) {
         Promise.all([
-            this.sendRPC("get_address", { account_index: 0 }, 5000),
             this.sendRPC("getheight", {}, 5000),
             this.sendRPC("getbalance", { account_index: 0 }, 5000)
         ]).then((data) => {
@@ -678,13 +677,10 @@ export class WalletRPC {
                             height: n.result.height
                         }
                     })
-                } else if (n.method == "get_address") {
-                    wallet.info.address = n.result.address
-                    this.sendGateway("set_wallet_data", {
-                        info: {
-                            address: n.result.address
-                        }
-                    })
+                    this.wallet_info = {
+                        height: n.result.height
+                    }
+                    
                 } else if (n.method == "getbalance") {
                     if (this.wallet_state.balance == n.result.balance &&
                        this.wallet_state.unlocked_balance == n.result.unlocked_balance) {
