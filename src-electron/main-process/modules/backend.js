@@ -524,6 +524,77 @@ export class Backend {
             })
         })
     }
+    
+    getTooltipLabel () {
+
+        if(!this.daemon || !this.walletd)
+            return "Initializing..."
+
+        let daemon_type = this.config_data.daemon.type
+        let daemon_info = this.daemon.daemon_info
+        let wallet_info = this.walletd.wallet_info
+
+        if(Object.keys(daemon_info).length == 0 || Object.keys(wallet_info).length == 0)
+            return "Initializing..."
+
+        let target_height = 0
+        if(daemon_type === "local" && !daemon_info.is_ready)
+            target_height = Math.max(daemon_info.height, daemon_info.target_height)
+        else
+            target_height = daemon_info.height
+
+        let daemon_local_pct = 0
+        if(daemon_type !== "remote") {
+            let d_pct = (100 * daemon_info.height_without_bootstrap / target_height).toFixed(1)
+            if(d_pct == 100.0 && daemon_info.height_without_bootstrap < target_height)
+                daemon_local_pct = 99.9
+            else
+                daemon_local_pct = d_pct
+        }
+
+        let daemon_pct = 0
+        if(daemon_type === "local")
+            daemon_pct = daemon_local_pct
+
+        let wallet_pct  = 0
+        let w_pct = (100 * wallet_info.height / target_height).toFixed(1)
+        if(w_pct == 100.0 && wallet_info.height < target_height)
+            wallet_pct = 99.9
+        else
+            wallet_pct = w_pct
+
+        let status = ""
+
+        if(daemon_type !== "remote") {
+            status += `Daemon: ${daemon_info.height_without_bootstrap} / ${target_height} (${daemon_local_pct}%) `
+        }
+
+        if(daemon_type !== "local") {
+            status += `Remote: ${daemon_info.height} `
+        }
+
+        status += `Wallet: ${wallet_info.height} / ${target_height} (${wallet_pct}%) `
+
+        if(daemon_type === "local") {
+            if(daemon_info.height_without_bootstrap < target_height || !daemon_info.is_ready) {
+                status += "Syncing..."
+            } else if(wallet_info.height < target_height - 1 && wallet_info.height != 0) {
+                status += "Scanning..."
+            } else {
+                status += "Ready"
+            }
+        } else {
+            if(wallet_info.height < target_height - 1 && wallet_info.height != 0) {
+                status += "Scanning..."
+            } else if(daemon_info.height_without_bootstrap < target_height) {
+                status += "Syncing..."
+            } else {
+                status += "Ready"
+            }
+        }
+
+        return status
+    }
 
     quit () {
         return new Promise((resolve, reject) => {
